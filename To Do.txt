@@ -1,0 +1,49 @@
+New Features
+	Group notifications from the same app into the same banner
+	Icon size option (small, normal, large)
+
+Fixes
+	App icon shadow with circular icons
+	Better height calculation (based on text size, num lines, etc.)
+	Copic compatibility
+	Coono compatibility?
+	FullNC compatibility?
+
+To do for 2.0
+	Test message title support
+	Test message subtitle support
+	Test message attachment support
+	Fix cell height calculation
+
+
+Ideas/Notes
+	Make titleview + content view take up entire notification cell frame, and use a table view inset to make the top of the app icon visible (would simplify code)
+	If lone cell, set title etc as it is now, if it's top then set app name as title and put titles in bold inside content view with time label aligned with it
+	Hook UITableViewDelegate height for row to set row heights
+
+Changelog
+---------
+1.1.1
+	- Fixed ColorBanners compatibility
+	- Fixed bug where pictures sent with messages weren't displayed
+
+1.1
+	- Added button in settings to send a test notification
+	- Added option to remove "clear notification" button separator lines when swiping left
+	- Added option to remove reply button background when swiping left
+	- Added option for small icons
+	- Added ColorBanners compatibility
+	- Added DathBanners compatibility
+	- Added FlagPaint compatibility
+	- Added Calendar For Lockscreen compatibility
+	- Added Reminders For Lockscreen compatibility
+	- Fixed layout of snoozed alarms
+
+1.0
+	Initial release
+
+
+
+
+
+Current bulletin cells: UIApp.keyWindow.subviews[0].subviews[0].subviews[1].subviews[1].subviews[2].subviews[1].subviews[0].subviews[0].subviews[0].subviews[0].subviews

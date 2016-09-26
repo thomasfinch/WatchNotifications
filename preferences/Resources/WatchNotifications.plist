@@ -1,0 +1,80 @@
+entry = {
+	icon = icon.png;
+	label = WatchNotifications;
+	cell = PSLinkCell;
+};
+title = "WatchNotifications";
+items = (
+	{
+		cell = PSGroupCell;
+	},
+	{
+		cell = PSSwitchCell;
+		default = 1;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = enabled;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "Enabled";
+	},
+	{
+		cell = PSGroupCell;
+	},
+	{
+		cell = PSButtonCell;
+		action = sendTestNotification;
+		label = "Send Test Notification";
+	},
+	{
+		cell = PSGroupCell;
+	},
+	{
+		cell = PSSwitchCell;
+		default = 1;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = shadows;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "App Icon Shadow";
+	},
+	{
+		cell = PSSwitchCell;
+		default = 0;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = smallIcon;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "Small App Icon";
+	},
+	{
+		cell = PSSwitchCell;
+		default = 0;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = circularIcon;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "Circular App Icon";
+	},
+	{
+		cell = PSSwitchCell;
+		default = 1;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = lines;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "Hide Clear Button Lines";
+	},
+	{
+		cell = PSSwitchCell;
+		default = 1;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = actionButton;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "Hide Reply Button Color";
+	},
+	{
+		cell = PSGroupCell;
+		footerText = "© 2016 Thomas Finch";
+	},
+	{
+		cell = PSButtonCell;
+		action = TFTwitterButtonTapped;
+		icon = "Twitter.png";
+		label = "Developed by Thomas Finch";
+	}
+);

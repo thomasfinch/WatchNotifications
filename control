@@ -1,0 +1,9 @@
+Package: me.thomasfinch.watchnotifications
+Name: WatchNotifications
+Depends: mobilesubstrate, preferenceloader
+Version: 1.2
+Architecture: iphoneos-arm
+Description: WatchOS style lock screen notifications
+Maintainer: Thomas Finch
+Author: Thomas Finch
+Section: Tweaks
