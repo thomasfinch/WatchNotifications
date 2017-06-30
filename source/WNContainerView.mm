@@ -1,16 +1,14 @@
 #import "WNContainerView.h"
 
-const CGFloat ROUNDED_CORNER_RADIUS = 5;
 const CGFloat TEXT_PADDING = 10;
-const CGFloat TITLE_VIEW_HEIGHT = 25;
-const CGFloat TIME_LABEL_HEIGHT = 20;
 const CGFloat MESSAGE_TITLE_HEIGHT = 20;
+
+#define TITLE_VIEW_HEIGHT ([defaults boolForKey:@"ios10style"] ? 30 : 25)
 
 @implementation WNContainerView
 
-- (id)initWithCellType:(CellType)type {
+- (id)init {
 	if (self = [super initWithFrame:CGRectZero]) {
-		cellType = type;
 		notificationContainerView = [[UIView alloc] init];
 		titleView = [[UIView alloc] init];
 		contentView = [[UIView alloc] init];
@@ -19,8 +17,14 @@ const CGFloat MESSAGE_TITLE_HEIGHT = 20;
 		[notificationContainerView addSubview:contentView];
 
 		//Title and content view background colors
-		titleView.backgroundColor = [UIColor colorWithWhite:0.6 alpha:0.7];
-		contentView.backgroundColor = [UIColor colorWithWhite:0.45 alpha:0.4];
+		if ([defaults boolForKey:@"ios10style"]) {
+			titleView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.7];
+			contentView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.6];
+		}
+		else {
+			titleView.backgroundColor = [UIColor colorWithWhite:0.6 alpha:0.7];
+			contentView.backgroundColor = [UIColor colorWithWhite:0.45 alpha:0.4];
+		}
 	}
 	return self;
 }
@@ -31,7 +35,10 @@ const CGFloat MESSAGE_TITLE_HEIGHT = 20;
 }
 
 - (CGSize)iconPadding {
-	return CGSizeMake(7, 5);
+	if ([defaults boolForKey:@"ios10style"] || [defaults boolForKey:@"smallIcon"])
+		return CGSizeMake(8, 6);
+	else
+		return CGSizeMake(7, 5);
 }
 
 - (BOOL)readyToUpdateViews {
@@ -44,7 +51,7 @@ const CGFloat MESSAGE_TITLE_HEIGHT = 20;
 		return false;
 
 	//Icon view
-	if ((cellType == kLoneCell || cellType == kTopCell) && (!self.iconView || !self.appNameLabel))
+	if (!self.iconView || !self.appNameLabel)
 		return false;
 
 	return true;
@@ -56,55 +63,60 @@ const CGFloat MESSAGE_TITLE_HEIGHT = 20;
 	}
 
 	//Notification container view frame
-	CGRect notificationContainerViewFrame = self.bounds;
-	if (cellType == kLoneCell || cellType == kTopCell) {
-		CGFloat offset = [self iconPadding].height * 3;
-		notificationContainerViewFrame = CGRectMake(0, offset, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - offset);
-	}
-	notificationContainerView.frame = notificationContainerViewFrame;
+	CGFloat containerViewOffset = [self iconPadding].height * 3;
+	notificationContainerView.frame = CGRectMake(0, containerViewOffset, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - containerViewOffset);
 
 	//Title and content view frames
 	CGRect titleViewFrame = CGRectZero, contentViewFrame = CGRectZero;
-	const CGFloat titleViewHeight = (cellType == kLoneCell || cellType == kTopCell) ? TITLE_VIEW_HEIGHT : 0;
-	CGRectDivide(notificationContainerView.bounds, &titleViewFrame, &contentViewFrame, titleViewHeight, CGRectMinYEdge);
+	CGRectDivide(notificationContainerView.bounds, &titleViewFrame, &contentViewFrame, TITLE_VIEW_HEIGHT, CGRectMinYEdge);
 	titleView.frame = titleViewFrame;
 	contentView.frame = contentViewFrame;
 
 	//Round corners
 	CAShapeLayer *clippingLayer = [CAShapeLayer layer];
-	UIRectCorner cornersToRound = 0;
-	if (cellType == kLoneCell || cellType == kTopCell) {
-		cornersToRound = UIRectCornerTopLeft | UIRectCornerTopRight;
-	}
-	if (cellType == kLoneCell  || cellType == kBottomCell) {
-		cornersToRound = cornersToRound | UIRectCornerBottomLeft | UIRectCornerBottomRight;
-	}
-	clippingLayer.path = [UIBezierPath bezierPathWithRoundedRect:notificationContainerView.bounds byRoundingCorners:cornersToRound cornerRadii:CGSizeMake(ROUNDED_CORNER_RADIUS, ROUNDED_CORNER_RADIUS)].CGPath;
+	UIRectCorner cornersToRound = UIRectCornerTopLeft | UIRectCornerTopRight | UIRectCornerBottomLeft | UIRectCornerBottomRight;
+	CGFloat radius = [defaults boolForKey:@"ios10style"] ? 10 : 5;
+	clippingLayer.path = [UIBezierPath bezierPathWithRoundedRect:notificationContainerView.bounds byRoundingCorners:cornersToRound cornerRadii:CGSizeMake(radius, radius)].CGPath;
 	notificationContainerView.layer.mask = clippingLayer;
 
 	//Layout content view
 	[self layoutContentView];
 
-	if (cellType == kLoneCell || cellType == kTopCell) {
-		//Layout app name label
-		CGFloat offset = iconSize() + [self iconPadding].width * 2;
-		self.appNameLabel.frame = CGRectMake(offset, 0, CGRectGetWidth(titleView.bounds) - offset, CGRectGetHeight(titleView.bounds));
-		[titleView addSubview:self.appNameLabel];
+	//Layout app name label
+	CGFloat offset = iconSize() + [self iconPadding].width * 2;
+	self.appNameLabel.frame = CGRectMake(offset, 0, CGRectGetWidth(titleView.bounds) - offset, CGRectGetHeight(titleView.bounds));
+	if ([defaults boolForKey:@"ios10style"]) {
+		self.appNameLabel.textColor = [UIColor blackColor];
+		self.appNameLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:13];
+		self.appNameLabel.text = [self.appNameLabel.text uppercaseString];
+	}
+	[titleView addSubview:self.appNameLabel];
 
-		//Layout app icon
-		[self layoutAppIcon];
+	//Notification time label
+	self.timeLabel.frame = CGRectInset(titleView.bounds, TEXT_PADDING, 0);
+	self.timeLabel.textAlignment = NSTextAlignmentRight;
+	if ([defaults boolForKey:@"ios10style"]) {
+		self.timeLabel.textColor = [UIColor blackColor];
+		self.timeLabel.layer.compositingFilter = NULL;
+		self.timeLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:13];
 	}
-	else {
-		self.iconView.hidden = YES;
-		self.appNameLabel.hidden = YES;
-	}
+	else
+		self.timeLabel.textColor = [UIColor whiteColor];
+
+	[titleView addSubview:self.timeLabel];
+
+	//Layout app icon
+	[self layoutAppIcon];
 }
 
 - (void)layoutAppIcon {
 	//Set size & position
 	const CGSize padding = [self iconPadding];
 	const CGFloat size = iconSize();
-	self.iconView.frame = CGRectMake(padding.width, padding.height, size, size);
+	if ([defaults boolForKey:@"ios10style"] || [defaults boolForKey:@"smallIcon"])
+		self.iconView.frame = CGRectMake(padding.width, notificationContainerView.frame.origin.y + TITLE_VIEW_HEIGHT - padding.height - size, size, size);
+	else
+		self.iconView.frame = CGRectMake(padding.width, padding.height, size, size);
 	[self addSubview:self.iconView];
 
 	//Make circular if setting is on
@@ -153,18 +165,16 @@ const CGFloat MESSAGE_TITLE_HEIGHT = 20;
 	}
 
 	//Notification content label
-	self.contentLabel.frame = CGRectMake(0, titleContainerHeight, maxTextWidth, CGRectGetHeight(contentView.bounds) - titleContainerHeight - TIME_LABEL_HEIGHT);
-	self.contentLabel.frame = CGRectInset(self.contentLabel.frame, TEXT_PADDING, 0);
+	self.contentLabel.frame = CGRectInset(contentView.bounds, TEXT_PADDING, TEXT_PADDING);
 	self.contentLabel.numberOfLines = 0;
 	[self.contentLabel sizeToFit];
-	// self.contentLabel.backgroundColor = [UIColor redColor];
 	[contentView addSubview:self.contentLabel];
 
-	//Notification time label
-	self.timeLabel.frame = CGRectMake(0, CGRectGetHeight(contentView.bounds) - TIME_LABEL_HEIGHT, maxTextWidth, TIME_LABEL_HEIGHT);
-	self.timeLabel.frame = CGRectInset(self.timeLabel.frame, TEXT_PADDING, 0);
-	// self.timeLabel.backgroundColor = [UIColor greenColor];
-	[contentView addSubview:self.timeLabel];
+	if ([defaults boolForKey:@"ios10style"]) {
+		self.messageTitleLabel.textColor = [UIColor blackColor];
+		self.subtitleLabel.textColor = [UIColor blackColor];
+		self.contentLabel.textColor = [UIColor blackColor];
+	}
 }
 
 @end

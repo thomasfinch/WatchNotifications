@@ -11,11 +11,6 @@ const CGFloat CELL_SIDE_PADDING = 5.0;
 NSUserDefaults *defaults;
 BBServer *bbServer;
 
-struct CellInfo {
-	bool isMessage;
-	CellType type;
-};
-
 void showTestNotification() {
 	[[%c(SBLockScreenManager) sharedInstance] lockUIFromSource:1 withOptions:nil];
 
@@ -37,12 +32,12 @@ void showTestNotification() {
 
 const CGFloat iconSize() {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-		if ([defaults boolForKey:@"smallIcon"])
+		if ([defaults boolForKey:@"smallIcon"] || [defaults boolForKey:@"ios10style"])
 			return 20;
 		else
 			return 32;
 	else
-		if ([defaults boolForKey:@"smallIcon"])
+		if ([defaults boolForKey:@"smallIcon"] || [defaults boolForKey:@"ios10style"])
 			return 20;
 		else
 			return 30;
@@ -61,62 +56,46 @@ NSString* identifierForListItem(SBAwayListItem *listItem) {
 		return @"noIdentifier";
 }
 
-// UIImage* largeIconForListItem(SBAwayListItem *listItem) {
-// 	if ([listItem isKindOfClass:%c(SBAwayBulletinListItem)] || [listItem isKindOfClass:%c(SBSnoozedAlarmBulletinListItem)] || [listItem isKindOfClass:%c(SBSnoozedAlarmListItem)]) {
-// 		NSString *bundleID;
-// 		if ([listItem isKindOfClass:%c(SBAwayBulletinListItem)])
-// 			bundleID = [(BBBulletin*)[(SBAwayBulletinListItem*)listItem activeBulletin] sectionID];
-// 		else
-// 			bundleID = @"com.apple.mobiletimer";
-// 		int iconImageNumber = (iconSize() > 29) ? 1 : 0;
-// 		SBApplication *app = nil;
+UIImage* iconForListItem(SBAwayListItem *listItem) {
+	if ([listItem isKindOfClass:%c(SBAwayBulletinListItem)] || [listItem isKindOfClass:%c(SBSnoozedAlarmBulletinListItem)] || [listItem isKindOfClass:%c(SBSnoozedAlarmListItem)]) {
+		NSString *bundleID;
+		if ([listItem isKindOfClass:%c(SBAwayBulletinListItem)])
+			bundleID = [(BBBulletin*)[(SBAwayBulletinListItem*)listItem activeBulletin] sectionID];
+		else
+			bundleID = @"com.apple.mobiletimer";
+		int iconImageNumber = (iconSize() > 29) ? 1 : 0;
+		SBApplication *app = nil;
 
-// 		if ([[%c(SBApplicationController) sharedInstance] respondsToSelector:@selector(applicationWithBundleIdentifier:)])
-// 			app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleID];
-// 		else if ([[%c(SBApplicationController) sharedInstance] respondsToSelector:@selector(applicationWithDisplayIdentifier:)])
-// 			app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:bundleID];
+		if ([[%c(SBApplicationController) sharedInstance] respondsToSelector:@selector(applicationWithBundleIdentifier:)])
+			app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleID];
+		else if ([[%c(SBApplicationController) sharedInstance] respondsToSelector:@selector(applicationWithDisplayIdentifier:)])
+			app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:bundleID];
 
-// 		return [[[%c(SBApplicationIcon) alloc] initWithApplication:app] generateIconImage:iconImageNumber]; //0 = 29x29, 1 = 40x40, 2 = 60x60
-// 	}
-// 	else if ([listItem isKindOfClass:%c(SBAwayCardListItem)])
-// 		return [[UIImage alloc] initWithData:[((SBAwayCardListItem*)listItem).cardItem iconData] scale:[[UIScreen mainScreen] scale]];
+		return [[[%c(SBApplicationIcon) alloc] initWithApplication:app] generateIconImage:iconImageNumber]; //0 = 29x29, 1 = 40x40, 2 = 60x60
+	}
+	else if ([listItem isKindOfClass:%c(SBAwayCardListItem)])
+		return [[UIImage alloc] initWithData:[((SBAwayCardListItem*)listItem).cardItem iconData] scale:[[UIScreen mainScreen] scale]];
+	else
+		return nil;
+}
+
+// UIImage* iconForListItem(SBAwayListItem* listItem) {
+// 	UIImage *icon = nil;
+
+// 	NSLog(@"GETTING ICON FOR LIST ITEM: %@", listItem);
+// 	NSLog(@"IDENTIFIER: %@", identifierForListItem(listItem));
+
+// 	if ([listItem isKindOfClass:%c(SBSnoozedAlarmListItem)] || [listItem isKindOfClass:%c(SBSnoozedAlarmBulletinListItem)] || [listItem isKindOfClass:%c(SBAwayBulletinListItem)])
+// 		icon = [UIImage _applicationIconImageForBundleIdentifier:identifierForListItem(listItem) format:2 scale:[UIScreen mainScreen].scale];
+// 	else if ([listItem respondsToSelector:@selector(iconImage)])
+// 		icon = [listItem iconImage];
 // 	else
-// 		return nil;
-// }
+// 		icon = [[UIImage alloc] init]; //Handle the case where somehow an icon still hasn't been found yet
 
-// UIImage* smallIconForListItem(SBAwayListItem *listItem) {
-// 	if ([listItem isKindOfClass:%c(SBSnoozedAlarmListItem)])
-// 		return [(SBSnoozedAlarmListItem*)listItem iconImage];
-// 	else if ([listItem isKindOfClass:%c(SBAwayBulletinListItem)])
-// 		return [(SBAwayBulletinListItem*)listItem iconImage];
-// 	else if ([listItem isKindOfClass:%c(SBAwayCardListItem)])
-// 		return [(SBAwayCardListItem*)listItem cardThumbnail];
-// 	else if ([listItem isKindOfClass:%c(SBAwaySystemAlertItem)])
-// 		return [(SBAwaySystemAlertItem*)listItem iconImage];
-// 	else
-// 		return nil;
-// }
-
-// UIImage* iconForListItem(SBAwayListItem *listItem) {
-// 	UIImage *icon = iconForListItem(listItem);
-// 	if (!icon)
-// 		icon = [[UIImage alloc] init];
+// 	NSLog(@"ICON: %@", icon);
 
 // 	return icon;
 // }
-
-UIImage* iconForListItem(SBAwayListItem* listItem) {
-	UIImage *icon = nil;
-
-	if ([listItem isKindOfClass:%c(SBSnoozedAlarmListItem)] || [listItem isKindOfClass:%c(SBSnoozedAlarmBulletinListItem)] || [listItem isKindOfClass:%c(SBAwayBulletinListItem)])
-		icon = [UIImage _applicationIconImageForBundleIdentifier:identifierForListItem(listItem) format:2 scale:[UIScreen mainScreen].scale];
-	else if ([listItem respondsToSelector:@selector(iconImage)])
-		icon = [listItem iconImage];
-	else
-		icon = [[UIImage alloc] init]; //Handle the case where somehow an icon still hasn't been found yet
-
-	return icon;
-}
 
 %ctor {
 	defaults = [[NSUserDefaults alloc] initWithSuiteName:@"me.thomasfinch.watchnotifications"];
@@ -126,7 +105,8 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
         @"lines": @YES,
         @"actionButton": @YES,
         @"smallIcon": @NO,
-        @"circularIcon": @NO
+        @"circularIcon": @NO,
+        @"ios10style": @NO
     }];
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)showTestNotification, CFSTR("me.thomasfinch.watchnotifications-testnotification"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
@@ -147,8 +127,6 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
 	}
 
 	- (void)_sortItemList:(NSMutableArray*)itemList {
-		NSLog(@"SORT ITEM LIST CALLED WITH LIST: %@", itemList);
-
 		//Copy all list items from the current list items and put them into an NSDictionary of NSArrays (key is appID, value is NSArray of list items)
 		NSMutableDictionary *listItemsDict = [[NSMutableDictionary alloc] init];
 		for (SBAwayListItem* listItem in itemList) {
@@ -161,8 +139,6 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
 
 			[(NSMutableArray*)[listItemsDict objectForKey:identifier] addObject:listItem];
 		}
-
-		NSLog(@"DICT: %@", listItemsDict);
 
 		//Sort each array of list items by date (SBAwayListItem timestamp property)
 		for (NSMutableArray *listItemsArr in [listItemsDict allValues]) {
@@ -202,17 +178,24 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
 			UIImage *listItemImage = iconForListItem(listItem);
 			if (listItemImage) {
 				cell.icon = listItemImage;
+				cell.iconView.image = listItemImage;
 			}
 
 			//Copic compatibility should go here
 		}
 	}
 
-	- (double)tableView:(id)arg1 heightForRowAtIndexPath:(id)arg2 {
+	- (double)tableView:(id)arg1 heightForRowAtIndexPath:(NSIndexPath*)arg2 {
 
-		//Customize cell height
+		if (![defaults boolForKey:@"enabled"])
+			return %orig;
 
-		return %orig;
+		if (arg2.row == 0) {
+			return %orig * 1.1;
+		}
+		else {
+			return %orig * 1.3;
+		}
 	}
 
 %end
@@ -226,7 +209,7 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
 
 		self = %orig;
 
-		WNContainerView *containerView = [[WNContainerView alloc] initWithCellType:kLoneCell];
+		WNContainerView *containerView = [[WNContainerView alloc] init];
 		[self.realContentView addSubview:containerView];
 		objc_setAssociatedObject(self, "containerView", containerView, OBJC_ASSOCIATION_ASSIGN);
 
@@ -241,6 +224,9 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
 		}
 
 		WNContainerView *containerView = objc_getAssociatedObject(self, "containerView");
+		if (!containerView) {
+			return;
+		}
 
 		containerView.frame = CGRectInset(self.bounds, 2 * CELL_SIDE_PADDING, 0);
 
@@ -276,10 +262,6 @@ UIImage* iconForListItem(SBAwayListItem* listItem) {
 
 		//Slide to view label
 		MSHookIvar<UILabel*>(self, "_unlockTextLabel").hidden = YES;
-	}
-
-	+ (double)rowHeightForTitle:(NSString*)title subtitle:(NSString*)subtitle body:(NSString*)body maxLines:(unsigned long long)maxLines attachmentSize:(CGSize)attachmentSize secondaryContentSize:(CGSize)secondaryContentSize datesVisible:(BOOL)datesVis rowWidth:(double)rowWidth includeUnlockActionText:(BOOL)arg9 {
-		return %orig;
 	}
 
 	//ColorBanners support

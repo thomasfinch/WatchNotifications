@@ -80,6 +80,7 @@
 @end
 
 @interface SBAwayListItem : NSObject
+- (UIImage*)iconImage;
 @end
 
 @interface SBAwaySystemAlertItem : SBAwayListItem

@@ -1,17 +1,9 @@
 #import "Headers.h"
 
-typedef enum {
-	kLoneCell,
-	kTopCell,
-	kMiddleCell,
-	kBottomCell
-} CellType;
-
 extern NSUserDefaults *defaults;
 extern const CGFloat iconSize();
 
 @interface WNContainerView : UIView {
-	CellType cellType;
 	UIView *notificationContainerView;
 	UIView *titleView;
 	UIView *contentView;
@@ -28,7 +20,7 @@ extern const CGFloat iconSize();
 @property (nonatomic, assign) UILabel *subtitleLabel;
 @property (nonatomic, assign) UIView *attachmentView;
 
-- (id)initWithCellType:(CellType)type;
+- (id)init;
 - (void)updateViews;
 
 @end

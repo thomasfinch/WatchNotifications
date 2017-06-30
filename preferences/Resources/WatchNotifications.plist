@@ -68,6 +68,14 @@ items = (
 		label = "Hide Reply Button Color";
 	},
 	{
+		cell = PSSwitchCell;
+		default = 0;
+		defaults = "me.thomasfinch.watchnotifications";
+		key = ios10style;
+		PostNotification = me.thomasfinch.watchnotifications-prefschanged;
+		label = "iOS 10 Style Notifications";
+	},
+	{
 		cell = PSGroupCell;
 		footerText = "© 2016 Thomas Finch";
 	},
